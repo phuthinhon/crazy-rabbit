@@ -29,6 +29,14 @@
 			    }
 			};
 
+
+			var pipeBottom;
+			var pipeTop;
+			var player;
+			var score = 0;
+			var gameOver = false;
+			var scoreText;
+
 			var game = new Phaser.Game(config);
 			 
 			function preload ()
@@ -36,23 +44,59 @@
 				this.load.image('rabbit', 'assets/rabbit.png'); 
 			    this.load.image('background', 'assets/background-550.jpg');
 			    this.load.image('ground', 'assets/floor.png');
+			    this.load.image('topPipe', 'assets/top-pipe.png');
+			    this.load.image('bottomPipe', 'assets/bottom-pipe.png');
 			}
 
 			function create ()
 			{
 				this.add.image(0, 0, 'background').setOrigin(0, 0);
 
-				platforms = this.physics.add.staticGroup();
+				pipeBottom = this.physics.add.image(275, 660, 'bottomPipe');
+				pipeBottom.setImmovable(true);
+			  	pipeBottom.body.allowGravity = false;
 
+				platforms = this.physics.add.staticGroup();
     			platforms.create(0, 676, 'ground').setOrigin(0, 0).refreshBody();
+
+			  	pipeTop = this.physics.add.image(275, 40, 'topPipe');
+				pipeTop.setImmovable(true);
+			  	pipeTop.body.allowGravity = false;
+				
 
     			player = this.physics.add.sprite(100, 550, 'rabbit');
     			player.setBounce(0.1);
     			player.setCollideWorldBounds(true);
-    			this.physics.add.collider(player, platforms);
+    			
+			  	jumping = this.input.keyboard.createCursorKeys();
 
 
-    			jumping = this.input.keyboard.createCursorKeys();
+			  	var tween = this.tweens.add({
+			        targets: [ pipeTop ],
+			        y: 120,
+			        duration: 4000,
+			        yoyo: true,
+			        repeat: -1,
+			        delay: function (i, total, target) {
+			            return i * 1000;
+			        }
+			    });
+
+			    var tween2 = this.tweens.add({
+			        targets: [ pipeBottom ],
+			        y: 740,
+			        duration: 4000,
+			        yoyo: true,
+			        repeat: -1,
+			        delay: function (i, total, target) {
+			            return i * 1000;
+			        }
+			    });
+
+			    this.physics.add.collider(player, platforms);
+			  	this.physics.add.collider(player, pipeBottom, hitPipe, null, this);
+			  	this.physics.add.collider(player, pipeTop, hitPipe, null, this);
+
 
 			}
 
@@ -60,17 +104,47 @@
 			{
 				if (jumping.up.isDown && player.body.touching.down)
 					{
-					    player.setVelocityY(-600);
+					    player.setVelocityY(-675);
 					    player.setVelocityX(200).setDrag(0, 0);
 					}
 				if (jumping.down.isDown && player.body.touching.down)
 					{
-					    player.setVelocityY(-600);
+					    player.setVelocityY(-675);
 					    player.setVelocityX(-200).setDrag(0, 0);
 					}
+
+				// if (player.body.touching.down)
+				// 	{
+				// 		player.setVelocityX(0);
+				// 	}
 			}
 
+			function hitPipe (player, pipeBottom)
+			{
+				this.physics.pause();
+				player.body.allowGravity = true;
+				tweens.pause();
+				gameOver = true;
+				// this.scene.restart();
+			}
+
+
+
 			 // && this.player.setVelocityX() < 275
+
+
+			 // var position = player.body.width;
+				// if (jumping.up.isDown && player.body.touching.down && position<250)
+    //                 {
+    //                     player.setVelocityY(-600);
+    //                     player.setVelocityX(200);
+    //                 }
+
+    //             else if (jumping.up.isDown && player.body.touching.down && position>250)
+    //                 {
+    //                     player.setVelocityY(-600);
+    //                     player.setVelocityX(-200);
+    //                 }
     		
     	</script>
 

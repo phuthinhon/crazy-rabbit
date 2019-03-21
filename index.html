@@ -46,11 +46,19 @@
 			    this.load.image('ground', 'assets/floor.png');
 			    this.load.image('topPipe', 'assets/top-pipe.png');
 			    this.load.image('bottomPipe', 'assets/bottom-pipe.png');
+			    this.load.audio('jump', 'assets/jump.mp3');
+			    this.load.audio('hit', 'assets/hit.mp3');
 			}
 
 			function create ()
 			{
 				this.add.image(0, 0, 'background').setOrigin(0, 0);
+
+				this.score = 0;
+				style = { font: '45px Arial', fill: '#fff' };
+
+				this.scoreText = this.add.text(260, 900, this.score, style).setDepth(1);
+				
 
 				pipeBottom = this.physics.add.image(275, 660, 'bottomPipe');
 				pipeBottom.setImmovable(true);
@@ -67,6 +75,7 @@
     			player = this.physics.add.sprite(100, 550, 'rabbit');
     			player.setBounce(0.1);
     			player.setCollideWorldBounds(true);
+    			// player.setDrag(1000);
     			
 			  	jumping = this.input.keyboard.createCursorKeys();
 
@@ -97,20 +106,22 @@
 			  	this.physics.add.collider(player, pipeBottom, hitPipe, null, this);
 			  	this.physics.add.collider(player, pipeTop, hitPipe, null, this);
 
-
 			}
 
 			function update ()
 			{
+
 				if (jumping.up.isDown && player.body.touching.down)
 					{
 					    player.setVelocityY(-675);
 					    player.setVelocityX(200).setDrag(0, 0);
+					    this.sound.play('jump');
 					}
 				if (jumping.down.isDown && player.body.touching.down)
 					{
 					    player.setVelocityY(-675);
 					    player.setVelocityX(-200).setDrag(0, 0);
+					    this.sound.play('jump');
 					}
 
 				// if (player.body.touching.down)
@@ -122,6 +133,8 @@
 			function hitPipe (player, pipeBottom)
 			{
 				this.physics.pause();
+				this.sound.play('hit');
+				// this.sound.play('jump');
 				player.body.allowGravity = true;
 				tweens.pause();
 				gameOver = true;

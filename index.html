@@ -46,18 +46,26 @@
 			    this.load.image('ground', 'assets/floor.png');
 			    this.load.image('topPipe', 'assets/top-pipe.png');
 			    this.load.image('bottomPipe', 'assets/bottom-pipe.png');
+			    this.load.image('invisibleScore', 'assets/scoreBar.png');
 			    this.load.audio('jump', 'assets/jump.mp3');
 			    this.load.audio('hit', 'assets/hit.mp3');
+			    this.load.audio('coin', 'assets/coin.mp3');
+			    this.load.audio('falling', 'assets/falling2.mp3');
 			}
 
 			function create ()
 			{
 				this.add.image(0, 0, 'background').setOrigin(0, 0);
 
-				this.score = 0;
+
+				scoreBar = this.physics.add.image(275, 0, 'invisibleScore').setOrigin(0, 0);
+				scoreBar.setImmovable(true);
+				scoreBar.body.allowGravity = false;
+
+				// this.score = 0;
 				style = { font: '45px Arial', fill: '#fff' };
 
-				this.scoreText = this.add.text(260, 900, this.score, style).setDepth(1);
+				scoreText = this.add.text(260, 900, '0', style).setDepth(1);
 				
 
 				pipeBottom = this.physics.add.image(275, 660, 'bottomPipe');
@@ -75,7 +83,8 @@
     			player = this.physics.add.sprite(100, 550, 'rabbit');
     			player.setBounce(0.1);
     			player.setCollideWorldBounds(true);
-    			// player.setDrag(1000);
+    			// player.setDrag(0, 0);
+    			// player.setVelocityX(0);
     			
 			  	jumping = this.input.keyboard.createCursorKeys();
 
@@ -105,42 +114,71 @@
 			    this.physics.add.collider(player, platforms);
 			  	this.physics.add.collider(player, pipeBottom, hitPipe, null, this);
 			  	this.physics.add.collider(player, pipeTop, hitPipe, null, this);
+			  	this.physics.add.overlap(player, scoreBar, scoring, null, this);
+
+
 
 			}
 
 			function update ()
 			{
 
-				if (jumping.up.isDown && player.body.touching.down)
+				if (jumping.right.isDown && player.body.touching.down)
 					{
+						player.setVelocityX(200);
 					    player.setVelocityY(-675);
-					    player.setVelocityX(200).setDrag(0, 0);
 					    this.sound.play('jump');
 					}
-				if (jumping.down.isDown && player.body.touching.down)
+				else if (jumping.left.isDown && player.body.touching.down)
 					{
 					    player.setVelocityY(-675);
-					    player.setVelocityX(-200).setDrag(0, 0);
+					    player.setVelocityX(-200);
 					    this.sound.play('jump');
 					}
-
-				// if (player.body.touching.down)
+				// else
 				// 	{
-				// 		player.setVelocityX(0);
+				// 	    player.setVelocityX(0);
 				// 	}
 			}
 
-			function hitPipe (player, pipeBottom)
-			{
+			function hitPipe (player, pipeBottom){
+
 				this.physics.pause();
 				this.sound.play('hit');
-				// this.sound.play('jump');
+				this.sound.play('falling');
 				player.body.allowGravity = true;
 				tweens.pause();
 				gameOver = true;
 				// this.scene.restart();
 			}
 
+			function scoring (player, scoreBar)
+			{
+
+				scoreBar.disableBody(true, true);
+				score += 1;
+				this.sound.play('coin');
+    			scoreText.setText(score);
+
+    	// 		if (scoreBar.countActive(true) === 0)
+					// {
+					// 	this.sound.play('coin');
+					// }
+				
+			}
+
+			function addScoreBar ()
+			{
+
+			}
+
+
+			// if (scoreBar.countActive(true) === 0)
+				// {
+				// 		scoreBar.children.iterate(function (child) {
+				// 		child.enableBody(true, child.x, 0, true, true);
+				// 	});			
+				// }
 
 
 			 // && this.player.setVelocityX() < 275
